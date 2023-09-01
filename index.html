@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let planeX = canvas.width / 2;
+        let planeY = canvas.height / 2;
+        
+        let missileX = canvas.width / 2;
+        let missileY = canvas.height / 2;
+        let missileMoving = false; // Variável para controlar o movimento do míssil
+
+        // Função para desenhar o avião
+        function drawPlane(x, y) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "blue";
+
+            // Corpo principal do avião
+            ctx.fillRect(x - 30, y - 5, 60, 10);
+            // Asas
+            ctx.fillRect(x, y - 25, 10, 50);
+
+            ctx.beginPath();
+            ctx.moveTo(x + 30, y - 5);
+            ctx.lineTo(x + 45, y);
+            ctx.lineTo(x + 30, y + 5);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Função para desenhar o míssil em formato de seta
+        function drawMissile(x, y, angle) {
+            ctx.fillStyle = "red";
+            
+            ctx.save(); // Salva o contexto atual
+            
+            // Translada o contexto para a posição do míssil
+            ctx.translate(x, y);
+            
+            // Rotaciona o contexto para apontar na direção do cursor
+            ctx.rotate(angle);
+            
+            // Desenha a seta
+            ctx.beginPath();
+            ctx.moveTo(-10, -2);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(-10, 2);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore(); // Restaura o contexto
+        }
+
+        // Função para calcular o ângulo entre o míssil e o cursor
+        function calculateMissileAngle() {
+            const dx = planeX - missileX;
+            const dy = planeY - missileY;
+            return Math.atan2(dy, dx);
+        }
+
+        // Função para atualizar a posição do avião com base na posição do cursor
+        function updatePlanePosition(event) {
+            planeX = event.clientX;
+            planeY = event.clientY;
+        }
+
+        // Adiciona ouvintes de eventos para acompanhar o movimento do cursor
+        window.addEventListener("mousemove", updatePlanePosition);
+
+        // Adiciona um ouvinte de evento para o botão direito do mouse
+        window.addEventListener("mousedown", function (event) {
+            if (event.button === 2) {
+                // Botão direito do mouse foi pressionado
+                missileMoving = true; // Inicia o movimento do míssil
+            }
+        });
+
+        // Função de animação
+        function animate() {
+            const missileAngle = calculateMissileAngle();
+            
+            if (missileMoving) {
+                missileX += Math.cos(missileAngle) * 2;
+                missileY += Math.sin(missileAngle) * 2;
+            }
+            
+            drawPlane(planeX, planeY);
+            drawMissile(missileX, missileY, missileAngle);
+            requestAnimationFrame(animate);
+        }
+
+        // Inicia a animação
+        animate();
+    </script>
+</body>
+</html>
